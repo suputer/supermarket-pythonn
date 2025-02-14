@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор продуктов</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .product { font-size: 50px; margin: 10px; }
+        .controls { display: flex; justify-content: center; align-items: center; margin: 10px; }
+        .controls button { font-size: 20px; margin: 0 10px; }
+        #payButton { margin-top: 20px; padding: 10px 20px; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Выберите продукты</h1>
+    <div id="products"></div>
+    <button id="payButton">Оплатить</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const products = [
+            { emoji: '🍔', name: 'Бургер', count: 0 },
+            { emoji: '🍟', name: 'Картофель фри', count: 0 },
+            { emoji: '🌭', name: 'Хот-дог', count: 0 },
+            { emoji: '🍗', name: 'Курица', count: 0 },
+            { emoji: '🍕', name: 'Пицца', count: 0 }
+        ];
+
+        const productsContainer = document.getElementById('products');
+        const payButton = document.getElementById('payButton');
+
+        products.forEach((product, index) => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+            productDiv.innerHTML = `
+                <span>${product.emoji}</span>
+                <div class="controls">
+                    <button onclick="updateCount(${index}, -1)">-</button>
+                    <span id="count-${index}">0</span>
+                    <button onclick="updateCount(${index}, 1)">+</button>
+                </div>
+            `;
+            productsContainer.appendChild(productDiv);
+        });
+
+        function updateCount(index, delta) {
+            products[index].count = Math.max(0, products[index].count + delta);
+            document.getElementById(`count-${index}`).textContent = products[index].count;
+        }
+
+        payButton.onclick = () => {
+            const totalStars = products.reduce((sum, product) => sum + product.count, 0);
+            if (totalStars === 0) {
+                alert('Выберите хотя бы один продукт.');
+                return;
+            }
+            
+            const orderData = { products, totalStars };
+            console.log("Отправка данных в бота:", orderData);
+            tg.sendData(JSON.stringify(orderData));
+        };
+    </script>
+</body>
+</html>
