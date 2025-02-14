@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор продуктов</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        .product {
+            font-size: 50px;
+            margin: 20px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 250px;
+            margin: 10px auto;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .controls button {
+            font-size: 20px;
+            margin: 0 10px;
+            padding: 5px 10px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .controls button:hover {
+            background: #0056b3;
+        }
+
+        #payButton {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #payButton:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Выберите продукты</h1>
+    <div class="container">
+        <div id="products"></div>
+        <button id="payButton">Оплатить</button>
+    </div>
+
+    <script>
+        const products = [
+            { emoji: '🍔', name: 'Бургер', count: 0 },
+            { emoji: '🍟', name: 'Картофель фри', count: 0 },
+            { emoji: '🌭', name: 'Хот-дог', count: 0 },
+            { emoji: '🍗', name: 'Курица', count: 0 },
+            { emoji: '🍕', name: 'Пицца', count: 0 }
+        ];
+
+        const productsContainer = document.getElementById('products');
+        const payButton = document.getElementById('payButton');
+
+        products.forEach((product, index) => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+
+            const emojiSpan = document.createElement('span');
+            emojiSpan.textContent = product.emoji;
+            productDiv.appendChild(emojiSpan);
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'controls';
+
+            const minusButton = document.createElement('button');
+            minusButton.textContent = '-';
+            minusButton.onclick = () => updateCount(index, -1);
+            controlsDiv.appendChild(minusButton);
+
+            const countSpan = document.createElement('span');
+            countSpan.id = `count-${index}`;
+            countSpan.textContent = product.count;
+            controlsDiv.appendChild(countSpan);
+
+            const plusButton = document.createElement('button');
+            plusButton.textContent = '+';
+            plusButton.onclick = () => updateCount(index, 1);
+            controlsDiv.appendChild(plusButton);
+
+            productDiv.appendChild(controlsDiv);
+            productsContainer.appendChild(productDiv);
+        });
+
+        function updateCount(index, delta) {
+            const product = products[index];
+            product.count = Math.max(0, product.count + delta);
+            document.getElementById(`count-${index}`).textContent = product.count;
+        }
+
+        payButton.onclick = () => {
+            const totalStars = products.reduce((sum, product) => sum + product.count, 0);
+            if (totalStars === 0) {
+                alert('Пожалуйста, выберите хотя бы один продукт.');
+                return;
+            }
+
+            // Отправка данных в бота
+            const tg = window.Telegram.WebApp;
+            tg.sendData(JSON.stringify({ products, totalStars }));
+        };
+    </script>
+</body>
+</html>
